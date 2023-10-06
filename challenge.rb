@@ -90,7 +90,7 @@ def seed_db
   end
 end
 
-def generate_output
+def top_up_and_generate_output
   puts ''
   Company.find_each do |company|
     next if company.users.empty?
@@ -122,4 +122,4 @@ def generate_output
 end
 
 seed_db
-generate_output
+top_up_and_generate_output
