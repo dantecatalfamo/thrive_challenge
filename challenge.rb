@@ -55,7 +55,7 @@ class Company < ActiveRecord::Base
     users.where(active_status: true)
   end
 
-  def emailable
+  def emailable_users
     if email_status
       active_users.where(email_status: true)
     else
@@ -63,8 +63,8 @@ class Company < ActiveRecord::Base
     end
   end
 
-  def not_emailable
-    active_users - emailable
+  def not_emailable_users
+    active_users - emailable_users
   end
 end
 
@@ -152,7 +152,7 @@ def top_up_and_generate_output
       puts "\tCompany Id: #{company.id}"
       puts "\tCompany Name: #{company.name}"
       puts "\tUsers Emailed:"
-      company.emailable.each do |user|
+      company.emailable_users.each do |user|
         puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
         puts "\t\t  Previous Token Balance, #{user.tokens}"
         puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
@@ -161,7 +161,7 @@ def top_up_and_generate_output
         user.save!
       end
       puts "\tUsers Not Emailed:"
-      company.not_emailable.each do |user|
+      company.not_emailable_users.each do |user|
         puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
         puts "\t\t  Previous Token Balance, #{user.tokens}"
         puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
