@@ -91,7 +91,7 @@ end
 #
 # @param users [Array<Hash>] List of users
 # @param companies [Array<Hash>] List of companies
-
+#
 def seed_db(users, companies)
   ActiveRecord::Base.transaction do
     companies.each do |company|
@@ -141,7 +141,7 @@ end
 # database in an inconsistent state where some overs have been topped
 # up and others haven't, as it could lead to some users being topped
 # up twice when the job is re-run.
-
+#
 def top_up_and_generate_output
   ActiveRecord::Base.transaction do
     puts ''
