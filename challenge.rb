@@ -65,59 +65,65 @@ def seed_db
   users = JSON.parse(File.read(USER_JSON))
   companies = JSON.parse(File.read(COMPANY_JSON))
 
-  companies.each do |company|
-    Company.create!(
-      id: company['id'],
-      name: company['name'],
-      top_up: company['top_up'],
-      email_status: company['email_status']
-    )
+  Company.transaction do
+    companies.each do |company|
+      Company.create!(
+        id: company['id'],
+        name: company['name'],
+        top_up: company['top_up'],
+        email_status: company['email_status']
+      )
+    end
   end
 
-  users.each do |user|
-    User.create!(
-      # Some users have duplicate IDs, ignore them since nothing
-      # references user IDs
-      # id: user['id'],
-      first_name: user['first_name'],
-      last_name: user['last_name'],
-      email: user['email'],
-      company_id: user['company_id'],
-      email_status: user['email_status'],
-      active_status: user['active_status'],
-      tokens: user['tokens']
-    )
+  User.transaction do
+    users.each do |user|
+      User.create!(
+        # Some users have duplicate IDs, ignore them since nothing
+        # references user IDs
+        # id: user['id'],
+        first_name: user['first_name'],
+        last_name: user['last_name'],
+        email: user['email'],
+        company_id: user['company_id'],
+        email_status: user['email_status'],
+        active_status: user['active_status'],
+        tokens: user['tokens']
+      )
+    end
   end
 end
 
 def top_up_and_generate_output
   puts ''
-  Company.find_each do |company|
-    next if company.users.empty?
+  ActiveRecord::Base.transaction do
+    Company.find_each do |company|
+      next if company.users.empty?
 
-    top_up_total = 0
-    puts "\tCompany Id: #{company.id}"
-    puts "\tCompany Name: #{company.name}"
-    puts "\tUsers Emailed:"
-    company.emailable.each do |user|
-      puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
-      puts "\t\t  Previous Token Balance, #{user.tokens}"
-      puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
-      user.tokens += company.top_up
-      top_up_total += company.top_up
-      user.save!
+      top_up_total = 0
+      puts "\tCompany Id: #{company.id}"
+      puts "\tCompany Name: #{company.name}"
+      puts "\tUsers Emailed:"
+      company.emailable.each do |user|
+        puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
+        puts "\t\t  Previous Token Balance, #{user.tokens}"
+        puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
+        user.tokens += company.top_up
+        top_up_total += company.top_up
+        user.save!
+      end
+      puts "\tUsers Not Emailed:"
+      company.not_emailable.each do |user|
+        puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
+        puts "\t\t  Previous Token Balance, #{user.tokens}"
+        puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
+        user.tokens += company.top_up
+        top_up_total += company.top_up
+        user.save!
+      end
+      puts "\t\tTotal amount of top ups for #{company.name}: #{top_up_total}"
+      puts ''
     end
-    puts "\tUsers Not Emailed:"
-    company.not_emailable.each do |user|
-      puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
-      puts "\t\t  Previous Token Balance, #{user.tokens}"
-      puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
-      user.tokens += company.top_up
-      top_up_total += company.top_up
-      user.save!
-    end
-    puts "\t\tTotal amount of top ups for #{company.name}: #{top_up_total}"
-    puts ''
   end
 end
 
