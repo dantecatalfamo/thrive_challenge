@@ -88,6 +88,9 @@ end
 # aborted and the offending record is reported so it can be corrected.
 #
 # User IDs in the provided JSON are ignored.
+#
+# @param users [Array<Hash>] List of users
+# @param companies [Array<Hash>] List of companies
 
 def seed_db(users, companies)
   ActiveRecord::Base.transaction do
@@ -123,6 +126,8 @@ def seed_db(users, companies)
       exit 1
     end
   end
+
+  nil
 end
 
 # Top up all users that are active and associated with a company, and
