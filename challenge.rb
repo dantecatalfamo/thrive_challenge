@@ -66,6 +66,14 @@ end
 
 ## Methods
 
+def run
+  users = JSON.parse(File.read(USER_JSON))
+  companies = JSON.parse(File.read(COMPANY_JSON))
+
+  seed_db(users, companies)
+  top_up_and_generate_output
+end
+
 # Seeds the DB with the provided JSON files.
 #
 # All insertions are done in a single transaction, in case there are
@@ -74,11 +82,10 @@ end
 #
 # If the seeding runs into any errors, the entire transaction is
 # aborted and the offending record is reported so it can be corrected.
+#
+# User IDs in the provided JSON are ignored.
 
-def seed_db
-  users = JSON.parse(File.read(USER_JSON))
-  companies = JSON.parse(File.read(COMPANY_JSON))
-
+def seed_db(users, companies)
   ActiveRecord::Base.transaction do
     companies.each do |company|
       Company.create!(
@@ -159,5 +166,4 @@ def top_up_and_generate_output
   end
 end
 
-seed_db
-top_up_and_generate_output
+run
