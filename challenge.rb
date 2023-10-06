@@ -14,6 +14,8 @@ require 'active_record'
 USER_JSON = 'users.json'
 COMPANY_JSON = 'companies.json'
 
+## Setup database connection and schema
+
 ActiveRecord::Base.establish_connection(
   adapter: 'sqlite3',
   database: ':memory:'
@@ -61,11 +63,22 @@ class Company < ActiveRecord::Base
   end
 end
 
+## Methods
+
+# Seeds the DB with the provided JSON files.
+#
+# All insertions are done in a single transaction, in case there are
+# any errors related to constraints like a recurring ID. This is done
+# to prevent inconsistent database state where half the records are loaded.
+#
+# If the seeding runs into any errors, the entire transaction is
+# aborted and the offending record is reported so it can be corrected.
+
 def seed_db
   users = JSON.parse(File.read(USER_JSON))
   companies = JSON.parse(File.read(COMPANY_JSON))
 
-  Company.transaction do
+  ActiveRecord::Base.transaction do
     companies.each do |company|
       Company.create!(
         id: company['id'],
@@ -73,10 +86,12 @@ def seed_db
         top_up: company['top_up'],
         email_status: company['email_status']
       )
+    rescue StandardError => e
+      puts "Failed to insert Company: #{e}"
+      puts "Offending record: #{user}"
+      exit 1
     end
-  end
 
-  User.transaction do
     users.each do |user|
       User.create!(
         # Some users have duplicate IDs, ignore them since nothing
@@ -90,13 +105,29 @@ def seed_db
         active_status: user['active_status'],
         tokens: user['tokens']
       )
+    rescue StandardError => e
+      puts "Failed to insert User: #{e}"
+      puts "Offending record: #{user}"
+      exit 1
     end
   end
 end
 
+# Top up all users that are active and associated with a company, and
+# send emails to users who have email_status and work for companies
+# with email_status.
+#
+# Print out the changes made and who emails were sent to stdout
+#
+# All modifications in this method take place inside of a single
+# transaction. If there is an error, we don't want to leave the
+# database in an inconsistent state where some overs have been topped
+# up and others haven't, as it could lead to some users being topped
+# up twice when the job is re-run.
+
 def top_up_and_generate_output
-  puts ''
   ActiveRecord::Base.transaction do
+    puts ''
     Company.find_each do |company|
       next if company.users.empty?
 
