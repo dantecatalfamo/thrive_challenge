@@ -39,7 +39,8 @@ ActiveRecord::Base.connection.execute <<-SQL
         company_id INTEGER,
         email_status BOOLEAN,
         active_status BOOLEAN,
-        tokens INTEGER
+        tokens INTEGER,
+        UNIQUE(company_id, email)
     )
 SQL
 
