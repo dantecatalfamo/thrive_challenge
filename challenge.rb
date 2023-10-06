@@ -78,7 +78,7 @@ def run
   top_up_and_generate_output
 end
 
-# Seeds the DB with the provided JSON files.
+# Seeds the DB with the provided array of hashes.
 #
 # All insertions are done in a single transaction, in case there are
 # any errors related to constraints like a recurring ID. This is done
