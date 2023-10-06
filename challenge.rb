@@ -99,19 +99,19 @@ def generate_output
     company.emailable.each do |user|
       puts "        #{user.last_name}, #{user.first_name}, #{user.email}"
       puts "          Previous Token Balance, #{user.tokens}"
+      puts "          New Token Balance #{user.tokens + company.top_up}"
       user.tokens += company.top_up
       top_up_total += company.top_up
       user.save!
-      puts "          New Token Balance #{user.tokens}"
     end
     puts '    Users Not Emailed:'
     company.not_emailable.each do |user|
       puts "        #{user.last_name}, #{user.first_name}, #{user.email}"
       puts "          Previous Token Balance, #{user.tokens}"
+      puts "          New Token Balance #{user.tokens + company.top_up}"
       user.tokens += company.top_up
       top_up_total += company.top_up
       user.save!
-      puts "          New Token Balance #{user.tokens}"
     end
     puts "        Total amount of top ups for #{company.name}: #{top_up_total}"
     puts ''
