@@ -49,18 +49,22 @@ class User < ActiveRecord::Base
 end
 
 class Company < ActiveRecord::Base
-  has_many :users, -> { where(active_status: true).order(last_name: :asc) }
+  has_many :users, -> { order(last_name: :asc) }
+
+  def active_users
+    users.where(active_status: true)
+  end
 
   def emailable
     if email_status
-      users.where(email_status: true)
+      active_users.where(email_status: true)
     else
       []
     end
   end
 
   def not_emailable
-    users - emailable
+    active_users - emailable
   end
 end
 
