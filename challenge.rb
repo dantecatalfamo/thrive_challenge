@@ -92,6 +92,8 @@ end
 
 def generate_output
   Company.find_each do |company|
+    next if company.users.empty?
+
     top_up_total = 0
     puts "    Company Id: #{company.id}"
     puts "    Company Name: #{company.name}"
