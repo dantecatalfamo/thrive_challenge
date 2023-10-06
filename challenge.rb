@@ -91,6 +91,7 @@ def seed_db
 end
 
 def generate_output
+  puts ''
   Company.find_each do |company|
     next if company.users.empty?
 
