@@ -95,27 +95,27 @@ def generate_output
     next if company.users.empty?
 
     top_up_total = 0
-    puts "    Company Id: #{company.id}"
-    puts "    Company Name: #{company.name}"
-    puts '    Users Emailed:'
+    puts "\tCompany Id: #{company.id}"
+    puts "\tCompany Name: #{company.name}"
+    puts "\tUsers Emailed:"
     company.emailable.each do |user|
-      puts "        #{user.last_name}, #{user.first_name}, #{user.email}"
-      puts "          Previous Token Balance, #{user.tokens}"
-      puts "          New Token Balance #{user.tokens + company.top_up}"
+      puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
+      puts "\t\t  Previous Token Balance, #{user.tokens}"
+      puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
       user.tokens += company.top_up
       top_up_total += company.top_up
       user.save!
     end
-    puts '    Users Not Emailed:'
+    puts "\tUsers Not Emailed:"
     company.not_emailable.each do |user|
-      puts "        #{user.last_name}, #{user.first_name}, #{user.email}"
-      puts "          Previous Token Balance, #{user.tokens}"
-      puts "          New Token Balance #{user.tokens + company.top_up}"
+      puts "\t\t#{user.last_name}, #{user.first_name}, #{user.email}"
+      puts "\t\t  Previous Token Balance, #{user.tokens}"
+      puts "\t\t  New Token Balance #{user.tokens + company.top_up}"
       user.tokens += company.top_up
       top_up_total += company.top_up
       user.save!
     end
-    puts "        Total amount of top ups for #{company.name}: #{top_up_total}"
+    puts "\t\tTotal amount of top ups for #{company.name}: #{top_up_total}"
     puts ''
   end
 end
